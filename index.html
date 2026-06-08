@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Porra Mundial 2026</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --bg2: #f8f9fa; --bg3: #f0f2f5;
+      --text: #1a1a2e; --text2: #555577; --text3: #999;
+      --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.15);
+      --red: #e63946; --gold: #f4a226;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141418; --bg2: #1e1e26; --bg3: #252530;
+        --text: #eeeef5; --text2: #9999bb; --text3: #555570;
+        --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+      }
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+    .app { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 2rem; }
+    .header-flag { font-size: 36px; margin-bottom: 6px; }
+    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+    .header p { color: var(--text2); font-size: 13px; margin-top: 4px; }
+
+    /* Card */
+    .card { background: var(--bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .last-update { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; display: inline-block; }
+    .refresh-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border2); background: none; cursor: pointer; font-size: 12px; color: var(--text2); transition: all 0.15s; }
+    .refresh-btn:hover { background: var(--bg2); color: var(--text); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { border-bottom: 2px solid var(--border2); background: var(--bg2); }
+    th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
+    th.r { text-align: right; }
+    td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    td.r { text-align: right; font-variant-numeric: tabular-nums; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--bg2); }
+
+    /* Position cell */
+    .pos-wrap { display: flex; align-items: center; gap: 10px; }
+    .medal { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .gold-m   { background: #fef3c7; color: #78350f; }
+    .silver-m { background: #e2e8f0; color: #374151; }
+    .bronze-m { background: #fde8d8; color: #7c2d12; }
+    .pos-num  { color: var(--text3); font-size: 13px; font-weight: 500; min-width: 28px; text-align: center; }
+
+    /* Name */
+    .name { font-weight: 600; font-size: 15px; }
+
+    /* Points */
+    .pts { font-size: 20px; font-weight: 700; }
+    .pts-zero { color: var(--text3); }
+
+    /* Badge paga/no paga */
+    .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; display: inline-block; }
+    .badge-ok  { background: #dcfce7; color: #166534; }
+    .badge-nok { background: #fee2e2; color: #991b1b; }
+    @media (prefers-color-scheme: dark) {
+      .badge-ok  { background: #14532d; color: #86efac; }
+      .badge-nok { background: #7f1d1d; color: #fca5a5; }
+      .gold-m    { background: #78350f; color: #fef3c7; }
+      .silver-m  { background: #374151; color: #e2e8f0; }
+      .bronze-m  { background: #7c2d12; color: #fde8d8; }
+    }
+
+    /* Loading / error */
+    .loading { text-align: center; padding: 3rem 1rem; color: var(--text2); font-size: 14px; }
+    .loading i { font-size: 30px; display: block; margin-bottom: 10px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Update notice */
+    .update-ts { text-align: center; padding: 10px; font-size: 12px; color: var(--text3); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-flag">🏆</div>
+    <h1>Porra Mundial 2026</h1>
+    <p id="subtitle">Cargando clasificación...</p>
+  </div>
+
+  <div id="main-card" class="card" style="display:none">
+    <div class="toolbar">
+      <span class="last-update"><span class="dot"></span><span id="last-update">En vivo</span></span>
+      <button class="refresh-btn" onclick="loadData()"><i class="ti ti-refresh"></i> Actualizar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:52px">#</th>
+            <th>Participante</th>
+            <th class="r">Puntos</th>
+            <th class="r"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="update-ts" id="update-ts"></div>
+  </div>
+
+  <div id="loader" class="card loading">
+    <i class="ti ti-loader-2"></i>Conectando con la hoja de resultados...
+  </div>
+</div>
+
+<script>
+// URL publicada del Google Sheet (Clasif. General)
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?output=csv';
+
+function parseCsv(data) {
+  // Estructura real detectada:
+  // col0: COMEN/PAGAN o vacío (indica si ha pagado)
+  // col1: posición (ej: "1º")
+  // col2: nombre
+  // col3: puntos totales
+  // col5: timestamp de última actualización (solo en fila cabecera)
+
+  const players = [];
+  let lastUpdate = '';
+
+  data.forEach((row, i) => {
+    // Fila de cabecera (tiene "POSICIÓN" o "Última Actualización")
+    if (row.join('').includes('Última Actualización')) {
+      lastUpdate = row[5] || '';
+      return;
+    }
+    // Filas de cabecera vacías o con solo texto de columna
+    if (!row[2] || row[2].trim() === '' || row[1] === 'POSICIÓN') return;
+    // Filtrar filas que no son jugadores
+    const nombre = row[2].trim();
+    const pos = row[1] ? row[1].trim() : '';
+    const pts = row[3] !== undefined ? row[3].trim() : '0';
+    const pago = row[0] ? row[0].trim() : '';
+
+    if (nombre && pos) {
+      players.push({ pos, nombre, pts: parseInt(pts) || 0, pago });
+    }
+  });
+
+  return { players, lastUpdate };
+}
+
+function posCell(i, posStr) {
+  if (i === 0) return `<span class="medal gold-m">🥇</span>`;
+  if (i === 1) return `<span class="medal silver-m">🥈</span>`;
+  if (i === 2) return `<span class="medal bronze-m">🥉</span>`;
+  return `<span class="pos-num">${posStr}</span>`;
+}
+
+function renderTable(players, lastUpdate) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  players.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    const ptsClass = p.pts === 0 ? 'pts pts-zero' : 'pts';
+    const pago = p.pago === 'PAGAN' ? '' :
+                 p.pago === 'COMEN' ? '<span class="badge badge-nok">No paga</span>' : '';
+
+    tr.innerHTML = `
+      <td>${posCell(i, p.pos)}</td>
+      <td><span class="name">${p.nombre}</span></td>
+      <td class="r"><span class="${ptsClass}">${p.pts}</span></td>
+      <td class="r">${pago}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (lastUpdate) {
+    document.getElementById('update-ts').textContent = `Última actualización de la hoja: ${lastUpdate}`;
+  }
+}
+
+async function loadData() {
+  return new Promise((resolve, reject) => {
+    Papa.parse(CSV_URL, {
+      download: true,
+      skipEmptyLines: false,
+      complete: r => {
+        const { players, lastUpdate } = parseCsv(r.data);
+        renderTable(players, lastUpdate);
+        const now = new Date();
+        document.getElementById('last-update').textContent = `Actualizado ${now.toLocaleTimeString('es-ES')}`;
+        document.getElementById('subtitle').textContent = `${players.length} participantes · Mundial 2026`;
+        resolve();
+      },
+      error: reject
+    });
+  });
+}
+
+async function init() {
+  try {
+    await loadData();
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('main-card').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loader').innerHTML = `
+      <i class="ti ti-alert-circle" style="animation:none;color:#e63946"></i>
+      No se pudo cargar la hoja.<br><small style="color:var(--text3)">${e.message || 'Error de conexión'}</small>
+    `;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
