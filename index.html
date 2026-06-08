@@ -138,7 +138,7 @@ function renderGeneral(data){
   data.forEach(r=>{
     if(r.join('').includes('Última Actualización')){lu=r[5]||'';return;}
     if(!r[2]||!r[1]||!r[1].includes('º'))return;
-    players.push({nombre:r[2].trim(),pts:parseFloat(r[3])||0});
+    players.push({nombre:r[2].trim(),pts:parseFloat((r[3]||"0").replace(",","."))||0});
   });
   players.sort((a,b)=>b.pts-a.pts);
   if(lu)document.getElementById('footer').textContent=`Última actualización: ${lu}`;
@@ -153,7 +153,7 @@ function renderGeneral(data){
 
 function renderResumen(data){
   const rows=data.filter(r=>r[1]&&r[1].trim()&&r[2]!=='SELECCIONES'&&r[1]!=='');
-  rows.sort((a,b)=>(parseFloat(b[5])||0)-(parseFloat(a[5])||0));
+  rows.sort((a,b)=>(parseFloat(b[5].replace(",","."))||0)-(parseFloat(a[5].replace(",","."))||0));
   let h='<div class="tbl-wrap"><table class="resumen-table"><thead><tr><th></th><th class="r">🌍</th><th class="r">⚽</th><th class="r">🏆</th><th class="r">Total</th></tr></thead><tbody>';
   rows.forEach(r=>h+=`<tr><td class="name">${r[1]}</td><td class="r">${r[2]||0}</td><td class="r">${r[3]||0}</td><td class="r">${r[4]||0}</td><td class="r"><strong>${r[5]||0}</strong></td></tr>`);
   return h+'</tbody></table></div>';
