@@ -83,13 +83,13 @@ const FLAGS = {
 };
 
 const URLS = {
-  general:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=0&single=true&output=csv',
+  general:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=464164987&single=true&output=csv',
   resumen:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=0&single=true&output=csv',
   detalle:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=1171356781&single=true&output=csv',
   selecc:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=159607314&single=true&output=csv',
   goleadores:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=538522937&single=true&output=csv',
   premios:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=844381625&single=true&output=csv',
-  clasif:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?output=csv',
+  clasif:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=464164987&single=true&output=csv',
 };
 
 function fetch_(url){return new Promise((res,rej)=>Papa.parse(url,{download:true,skipEmptyLines:false,complete:r=>res(r.data),error:rej}));}
