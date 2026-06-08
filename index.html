@@ -8,219 +8,262 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #ffffff; --bg2: #f8f9fa; --bg3: #f0f2f5;
-      --text: #1a1a2e; --text2: #555577; --text3: #999;
-      --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.15);
-      --red: #e63946; --gold: #f4a226;
-    }
+    :root { --bg:#fff; --bg2:#f8f9fa; --bg3:#f0f2f5; --text:#1a1a2e; --text2:#555577; --text3:#999; --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16); --r:8px; --rl:14px; }
     @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #141418; --bg2: #1e1e26; --bg3: #252530;
-        --text: #eeeef5; --text2: #9999bb; --text3: #555570;
-        --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
-      }
+      :root { --bg:#141418; --bg2:#1e1e26; --bg3:#252530; --text:#eeeef5; --text2:#9999bb; --text3:#55556f; --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15); }
+      .gm{background:#78350f;color:#fef3c7}.sm{background:#374151;color:#e2e8f0}.bm{background:#7c2d12;color:#fde8d8}
+      .vivo{background:#14532d;color:#86efac}
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
-    .app { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
-
-    /* Header */
-    .header { text-align: center; margin-bottom: 2rem; }
-    .header-flag { font-size: 36px; margin-bottom: 6px; }
-    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
-    .header p { color: var(--text2); font-size: 13px; margin-top: 4px; }
-
-    /* Card */
-    .card { background: var(--bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-
-    /* Toolbar */
-    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-    .last-update { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; display: inline-block; }
-    .refresh-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border2); background: none; cursor: pointer; font-size: 12px; color: var(--text2); transition: all 0.15s; }
-    .refresh-btn:hover { background: var(--bg2); color: var(--text); }
-
-    /* Table */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    thead tr { border-bottom: 2px solid var(--border2); background: var(--bg2); }
-    th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
-    th.r { text-align: right; }
-    td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
-    td.r { text-align: right; font-variant-numeric: tabular-nums; }
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--bg2); }
-
-    /* Position cell */
-    .pos-wrap { display: flex; align-items: center; gap: 10px; }
-    .medal { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-    .gold-m   { background: #fef3c7; color: #78350f; }
-    .silver-m { background: #e2e8f0; color: #374151; }
-    .bronze-m { background: #fde8d8; color: #7c2d12; }
-    .pos-num  { color: var(--text3); font-size: 13px; font-weight: 500; min-width: 28px; text-align: center; }
-
-    /* Name */
-    .name { font-weight: 600; font-size: 15px; }
-
-    /* Points */
-    .pts { font-size: 20px; font-weight: 700; }
-    .pts-zero { color: var(--text3); }
-
-    /* Badge paga/no paga */
-    .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; display: inline-block; }
-    .badge-ok  { background: #dcfce7; color: #166534; }
-    .badge-nok { background: #fee2e2; color: #991b1b; }
-    @media (prefers-color-scheme: dark) {
-      .badge-ok  { background: #14532d; color: #86efac; }
-      .badge-nok { background: #7f1d1d; color: #fca5a5; }
-      .gold-m    { background: #78350f; color: #fef3c7; }
-      .silver-m  { background: #374151; color: #e2e8f0; }
-      .bronze-m  { background: #7c2d12; color: #fde8d8; }
-    }
-
-    /* Loading / error */
-    .loading { text-align: center; padding: 3rem 1rem; color: var(--text2); font-size: 14px; }
-    .loading i { font-size: 30px; display: block; margin-bottom: 10px; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Update notice */
-    .update-ts { text-align: center; padding: 10px; font-size: 12px; color: var(--text3); border-top: 1px solid var(--border); }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg3); color:var(--text); min-height:100vh; }
+    .app { max-width:920px; margin:0 auto; padding:2rem 1rem 4rem; }
+    .hdr { text-align:center; margin-bottom:1.75rem; }
+    .hdr h1 { font-size:26px; font-weight:700; letter-spacing:-0.4px; }
+    .hdr p { color:var(--text2); font-size:13px; margin-top:5px; }
+    .card { background:var(--bg); border-radius:var(--rl); border:1px solid var(--border); overflow:hidden; box-shadow:0 2px 14px rgba(0,0,0,0.06); }
+    .tabs { display:flex; flex-wrap:wrap; gap:2px; padding:10px 10px 0; background:var(--bg2); border-bottom:1px solid var(--border); }
+    .tab { padding:7px 13px; border-radius:var(--r) var(--r) 0 0; border:1px solid transparent; border-bottom:none; cursor:pointer; font-size:12px; color:var(--text2); background:none; display:flex; align-items:center; gap:5px; position:relative; bottom:-1px; transition:all 0.12s; }
+    .tab:hover { color:var(--text); background:var(--bg); }
+    .tab.active { color:var(--text); background:var(--bg); border-color:var(--border); font-weight:600; }
+    .toolbar { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; border-bottom:1px solid var(--border); }
+    .live { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
+    .dot { width:7px; height:7px; border-radius:50%; background:#22c55e; flex-shrink:0; }
+    .btn { display:flex; align-items:center; gap:5px; padding:5px 12px; border-radius:var(--r); border:1px solid var(--border2); background:none; cursor:pointer; font-size:12px; color:var(--text2); transition:all 0.12s; }
+    .btn:hover { background:var(--bg2); color:var(--text); }
+    .panel { display:none; } .panel.active { display:block; }
+    .tbl-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead tr { background:var(--bg2); border-bottom:1px solid var(--border2); }
+    th { padding:8px 14px; font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; text-align:left; white-space:nowrap; }
+    th.r { text-align:right; }
+    td { padding:11px 14px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+    td.r { text-align:right; font-variant-numeric:tabular-nums; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--bg2); }
+    .medal { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; font-size:12px; font-weight:700; }
+    .gm{background:#fef3c7;color:#78350f}.sm{background:#e2e8f0;color:#374151}.bm{background:#fde8d8;color:#7c2d12}
+    .pn{color:var(--text3);font-size:12px;display:inline-block;width:26px;text-align:center}
+    .name{font-weight:600}.pts{font-size:17px;font-weight:700}.pts0{color:var(--text3)}
+    .pts-det{font-size:11px;color:var(--text3);margin-left:3px}
+    .flag{font-size:15px;margin-right:7px;vertical-align:middle}
+    .footer{padding:9px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+    .loading{text-align:center;padding:3rem 1rem;color:var(--text2);font-size:13px}
+    .loading i{font-size:26px;display:block;margin-bottom:8px;animation:spin 1s linear infinite}
+    .err{text-align:center;padding:2rem 1rem;color:var(--text2);font-size:13px}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <div class="header-flag">🏆</div>
-    <h1>Porra Mundial 2026</h1>
-    <p id="subtitle">Cargando clasificación...</p>
+  <div class="hdr">
+    <h1>⚽ Porra Mundial 2026</h1>
+    <p id="sub">Cargando datos...</p>
   </div>
-
-  <div id="main-card" class="card" style="display:none">
+  <div class="card">
+    <div class="tabs" id="tabs"></div>
     <div class="toolbar">
-      <span class="last-update"><span class="dot"></span><span id="last-update">En vivo</span></span>
-      <button class="refresh-btn" onclick="loadData()"><i class="ti ti-refresh"></i> Actualizar</button>
+      <span class="live"><span class="dot"></span><span id="upd">En vivo</span></span>
+      <button class="btn" onclick="loadAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Actualizar</button>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:52px">#</th>
-            <th>Participante</th>
-            <th class="r">Puntos</th>
-            <th class="r"></th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    <div class="update-ts" id="update-ts"></div>
-  </div>
-
-  <div id="loader" class="card loading">
-    <i class="ti ti-loader-2"></i>Conectando con la hoja de resultados...
+    <div id="panels"></div>
+    <div class="footer" id="footer"></div>
   </div>
 </div>
-
 <script>
-// URL publicada del Google Sheet (Clasif. General)
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?output=csv';
+const FLAGS = {
+  'Alemania':'🇩🇪','Arabia Saudí':'🇸🇦','Argelia':'🇩🇿','Argentina':'🇦🇷','Australia':'🇦🇺',
+  'Austria':'🇦🇹','Bélgica':'🇧🇪','Bosnia y Herzegovina':'🇧🇦','Brasil':'🇧🇷','Cabo Verde':'🇨🇻',
+  'Canadá':'🇨🇦','Catar':'🇶🇦','Colombia':'🇨🇴','Corea del Sur':'🇰🇷','Costa de Marfil':'🇨🇮',
+  'Croacia':'🇭🇷','Curazao':'🇨🇼','Ecuador':'🇪🇨','Egipto':'🇪🇬','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'España':'🇪🇸','Estados Unidos':'🇺🇸','Francia':'🇫🇷','Ghana':'🇬🇭','Haití':'🇭🇹',
+  'Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Irak':'🇮🇶','Irán':'🇮🇷','Japón':'🇯🇵','Jordania':'🇯🇴',
+  'Marruecos':'🇲🇦','México':'🇲🇽','Noruega':'🇳🇴','Nueva Zelanda':'🇳🇿','Países Bajos':'🇳🇱',
+  'Panamá':'🇵🇦','Paraguay':'🇵🇾','Portugal':'🇵🇹','RD Congo':'🇨🇩','República Checa':'🇨🇿',
+  'Senegal':'🇸🇳','Sudáfrica':'🇿🇦','Suecia':'🇸🇪','Suiza':'🇨🇭','Túnez':'🇹🇳',
+  'Turquía':'🇹🇷','Uruguay':'🇺🇾','Uzbekistán':'🇺🇿'
+};
 
-function parseCsv(data) {
-  // Estructura real detectada:
-  // col0: COMEN/PAGAN o vacío (indica si ha pagado)
-  // col1: posición (ej: "1º")
-  // col2: nombre
-  // col3: puntos totales
-  // col5: timestamp de última actualización (solo en fila cabecera)
+const URLS = {
+  general:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=0&single=true&output=csv',
+  resumen:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=0&single=true&output=csv',
+  detalle:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=1171356781&single=true&output=csv',
+  selecc:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=159607314&single=true&output=csv',
+  goleadores:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=538522937&single=true&output=csv',
+  premios:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=844381625&single=true&output=csv',
+  clasif:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?output=csv',
+};
 
-  const players = [];
-  let lastUpdate = '';
+function fetch_(url){return new Promise((res,rej)=>Papa.parse(url,{download:true,skipEmptyLines:false,complete:r=>res(r.data),error:rej}));}
+function pc(i,l){if(i===0)return'<span class="medal gm">1</span>';if(i===1)return'<span class="medal sm">2</span>';if(i===2)return'<span class="medal bm">3</span>';return`<span class="pn">${l}</span>`;}
 
-  data.forEach((row, i) => {
-    // Fila de cabecera (tiene "POSICIÓN" o "Última Actualización")
-    if (row.join('').includes('Última Actualización')) {
-      lastUpdate = row[5] || '';
-      return;
-    }
-    // Filas de cabecera vacías o con solo texto de columna
-    if (!row[2] || row[2].trim() === '' || row[1] === 'POSICIÓN') return;
-    // Filtrar filas que no son jugadores
-    const nombre = row[2].trim();
-    const pos = row[1] ? row[1].trim() : '';
-    const pts = row[3] !== undefined ? row[3].trim() : '0';
-    const pago = row[0] ? row[0].trim() : '';
+const TABS=[
+  {label:'Clasificación',icon:'ti-trophy'},{label:'Resumen',icon:'ti-list'},
+  {label:'Detalle',icon:'ti-zoom-in'},{label:'Selecciones',icon:'ti-flag'},
+  {label:'Goleadores',icon:'ti-ball-football'},{label:'Premios',icon:'ti-medal'},
+];
+let active=0;
 
-    if (nombre && pos) {
-      players.push({ pos, nombre, pts: parseInt(pts) || 0, pago });
-    }
+function buildTabs(){
+  const tc=document.getElementById('tabs');tc.innerHTML='';
+  TABS.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(i===active?' active':'');
+    b.innerHTML=`<i class="ti ${t.icon}" aria-hidden="true"></i>${t.label}`;
+    b.onclick=()=>{active=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((x,j)=>x.classList.toggle('active',j===i));};
+    tc.appendChild(b);
   });
-
-  return { players, lastUpdate };
 }
 
-function posCell(i, posStr) {
-  if (i === 0) return `<span class="medal gold-m">🥇</span>`;
-  if (i === 1) return `<span class="medal silver-m">🥈</span>`;
-  if (i === 2) return `<span class="medal bronze-m">🥉</span>`;
-  return `<span class="pos-num">${posStr}</span>`;
-}
-
-function renderTable(players, lastUpdate) {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-
-  players.forEach((p, i) => {
-    const tr = document.createElement('tr');
-    const ptsClass = p.pts === 0 ? 'pts pts-zero' : 'pts';
-    const pago = p.pago === 'PAGAN' ? '' :
-                 p.pago === 'COMEN' ? '<span class="badge badge-nok">No paga</span>' : '';
-
-    tr.innerHTML = `
-      <td>${posCell(i, p.pos)}</td>
-      <td><span class="name">${p.nombre}</span></td>
-      <td class="r"><span class="${ptsClass}">${p.pts}</span></td>
-      <td class="r">${pago}</td>
-    `;
-    tbody.appendChild(tr);
+function renderGeneral(data){
+  const players=[];
+  let lu='';
+  data.forEach(r=>{
+    if(r.join('').includes('Última Actualización')){lu=r[5]||'';return;}
+    if(!r[2]||!r[1]||!r[1].includes('º'))return;
+    players.push({nombre:r[2].trim(),pts:parseFloat(r[3])||0});
   });
-
-  if (lastUpdate) {
-    document.getElementById('update-ts').textContent = `Última actualización de la hoja: ${lastUpdate}`;
-  }
+  players.sort((a,b)=>b.pts-a.pts);
+  if(lu)document.getElementById('footer').textContent=`Última actualización: ${lu}`;
+  document.getElementById('sub').textContent=`${players.length} participantes · Mundial 2026`;
+  let h='<div class="tbl-wrap"><table><thead><tr><th style="width:46px">#</th><th>Participante</th><th class="r">Puntos</th></tr></thead><tbody>';
+  players.forEach((p,i)=>{
+    const badge=i<7?' 🍗🍺':' 💰';
+    h+=`<tr><td>${pc(i,(i+1)+'º')}</td><td><span class="name">${p.nombre}</span><span style="font-size:14px">${badge}</span></td><td class="r"><span class="${p.pts===0?'pts pts0':'pts'}">${p.pts}</span></td></tr>`;
+  });
+  return h+'</tbody></table></div>';
 }
 
-async function loadData() {
-  return new Promise((resolve, reject) => {
-    Papa.parse(CSV_URL, {
-      download: true,
-      skipEmptyLines: false,
-      complete: r => {
-        const { players, lastUpdate } = parseCsv(r.data);
-        renderTable(players, lastUpdate);
-        const now = new Date();
-        document.getElementById('last-update').textContent = `Actualizado ${now.toLocaleTimeString('es-ES')}`;
-        document.getElementById('subtitle').textContent = `${players.length} participantes · Mundial 2026`;
-        resolve();
-      },
-      error: reject
+function renderResumen(data){
+  const rows=data.filter(r=>r[1]&&r[1].trim()&&r[2]!=='SELECCIONES'&&r[1]!=='');
+  rows.sort((a,b)=>(parseFloat(b[5])||0)-(parseFloat(a[5])||0));
+  let h='<div class="tbl-wrap"><table><thead><tr><th>Participante</th><th class="r">Selecciones</th><th class="r">Goleadores</th><th class="r">Premios</th><th class="r">Total</th></tr></thead><tbody>';
+  rows.forEach(r=>h+=`<tr><td class="name">${r[1]}</td><td class="r">${r[2]||0}</td><td class="r">${r[3]||0}</td><td class="r">${r[4]||0}</td><td class="r"><strong>${r[5]||0}</strong></td></tr>`);
+  return h+'</tbody></table></div>';
+}
+
+function renderDetalle(data, vivoSel, vivoGol){
+  // Detectar participantes con datos: buscar columnas con nombre en fila cabecera
+  const header=data[0]||[];
+  // Nombres en cols 2,5,8,11... (cada 3)
+  const parts=[];
+  for(let c=2;c<header.length;c+=3){if(header[c]&&header[c].trim())parts.push({name:header[c].trim(),col:c});}
+
+  const catRows=data.filter(r=>r[0]&&r[0].trim()&&r[0]!=='CATEGORÍA'&&r[1]&&r[1].trim());
+  let h='<div class="tbl-wrap"><table><thead><tr><th>Categoría</th><th class="r">Mult.</th>';
+  parts.forEach(p=>h+=`<th class="r" style="font-size:11px">${p.name}</th>`);
+  h+='</tr></thead><tbody>';
+  catRows.forEach(r=>{
+    const cat=r[0];
+    const mult=r[1];
+    const tipo=cat.toLowerCase().includes('goleador')?'gol':cat.toLowerCase().includes('equipo')||cat.toLowerCase().includes('peor')?'sel':'pre';
+    h+=`<tr><td style="white-space:nowrap">${cat}</td><td class="r" style="color:var(--text2);font-size:12px">${mult}</td>`;
+    parts.forEach(p=>{
+      const apuesta=r[p.col]||'';
+      const pts=r[p.col+1]||'0';
+      if(!apuesta){h+=`<td class="r"></td>`;return;}
+      const vivo=tipo==='sel'?vivoSel.has(apuesta):tipo==='gol'?vivoGol.has(apuesta):false;
+      const bg=vivo?'background:#f0fdf4;':'';
+      h+=`<td class="r" style="font-size:12px;${bg}white-space:nowrap">${apuesta}<span class="pts-det">(${pts})</span></td>`;
     });
+    h+='</tr>';
   });
+  return h+'</tbody></table></div>';
 }
 
-async function init() {
-  try {
-    await loadData();
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('main-card').style.display = 'block';
-  } catch(e) {
-    document.getElementById('loader').innerHTML = `
-      <i class="ti ti-alert-circle" style="animation:none;color:#e63946"></i>
-      No se pudo cargar la hoja.<br><small style="color:var(--text3)">${e.message || 'Error de conexión'}</small>
-    `;
+function renderSelecc(data){
+  const header=data[0]||[];
+  const rows=data.slice(1).filter(r=>r[0]&&r[0].trim());
+  rows.sort((a,b)=>(parseFloat(b[b.length-2])||0)-(parseFloat(a[a.length-2])||0));
+  let h='<div class="tbl-wrap"><table><thead><tr><th>Selección</th>';
+  // headers sin la col "Sigue en liza?"
+  header.slice(1,-1).forEach(c=>h+=`<th class="r" style="font-size:10px">${c}</th>`);
+  h+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    const flag=FLAGS[r[0]]||'';
+    h+=`<tr><td><span class="flag">${flag}</span><span class="name">${r[0]}</span></td>`;
+    r.slice(1,-1).forEach((v,i)=>{
+      const last=i===r.slice(1,-1).length-1;
+      h+=`<td class="r"${last?' style="font-weight:700"':''}>${v||'–'}</td>`;
+    });
+    h+='</tr>';
+  });
+  return h+'</tbody></table></div>';
+}
+
+function renderGoleadores(data){
+  const rows=data.filter(r=>r[0]&&r[0].trim()&&r[0]!=='Jugador');
+  rows.sort((a,b)=>(parseFloat(b[1])||0)-(parseFloat(a[1])||0));
+  let h='<div class="tbl-wrap"><table><thead><tr><th style="width:46px">#</th><th>Jugador</th><th class="r">Goles</th></tr></thead><tbody>';
+  rows.forEach((r,i)=>h+=`<tr><td>${pc(i,(i+1)+'º')}</td><td class="name">${r[0]}</td><td class="r"><span class="${(parseFloat(r[1])||0)===0?'pts pts0':'pts'}">${r[1]||0}</span></td></tr>`);
+  return h+'</tbody></table></div>';
+}
+
+function renderPremios(data){
+  const cats=['Balón de Oro','Mejor Jugador Joven','Guante de Oro'];
+  const blocks=[[],[],[]];
+  data.slice(2).forEach(r=>{
+    if(r[0]&&r[0].trim())blocks[0].push({j:r[0],p:parseFloat(r[1])||0});
+    if(r[3]&&r[3].trim())blocks[1].push({j:r[3],p:parseFloat(r[4])||0});
+    if(r[6]&&r[6].trim())blocks[2].push({j:r[6],p:parseFloat(r[7])||0});
+  });
+  blocks.forEach(b=>b.sort((a,c)=>c.p-a.p));
+  const maxRows=Math.max(...blocks.map(b=>b.length));
+  let h='<div class="tbl-wrap"><table><thead><tr>';
+  cats.forEach(c=>h+=`<th>${c}</th><th class="r">Pts</th><th style="width:16px"></th>`);
+  h+='</tr></thead><tbody>';
+  for(let i=0;i<maxRows;i++){
+    h+='<tr>';
+    blocks.forEach(b=>{
+      const e=b[i]||{j:'',p:''};
+      h+=`<td>${e.j}</td><td class="r">${e.j?e.p:''}</td><td></td>`;
+    });
+    h+='</tr>';
   }
+  return h+'</tbody></table></div>';
 }
 
-init();
+async function loadAll(){
+  document.getElementById('upd').textContent='Actualizando...';
+  buildTabs();
+  const pc2=document.getElementById('panels');pc2.innerHTML='';
+  TABS.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='panel'+(i===active?' active':'');
+    d.id=`p${i}`;
+    d.innerHTML=`<div class="loading"><i class="ti ti-loader-2"></i>Cargando ${t.label}...</div>`;
+    pc2.appendChild(d);
+  });
+
+  try{
+    // Cargar en paralelo
+    const [dataClasif, dataResumen, dataDetalle, dataSelecc, dataGol, dataPremios] = await Promise.all([
+      fetch_(URLS.clasif), fetch_(URLS.resumen), fetch_(URLS.detalle),
+      fetch_(URLS.selecc), fetch_(URLS.goleadores), fetch_(URLS.premios)
+    ]);
+
+    // Construir sets de vivos desde Selecciones y Goleadores
+    const vivoSel=new Set();
+    dataSelecc.slice(1).forEach(r=>{if(r[0]&&r[r.length-1]==='Sí')vivoSel.add(r[0].trim());});
+    const vivoGol=new Set();
+    dataGol.slice(1).forEach(r=>{if(r[0]&&r[r.length-1]==='Sí')vivoGol.add(r[0].trim());});
+
+    const renders=[
+      renderGeneral(dataClasif),
+      renderResumen(dataResumen),
+      renderDetalle(dataDetalle, vivoSel, vivoGol),
+      renderSelecc(dataSelecc),
+      renderGoleadores(dataGol),
+      renderPremios(dataPremios),
+    ];
+    renders.forEach((html,i)=>{const p=document.getElementById(`p${i}`);if(p)p.innerHTML=html;});
+  }catch(e){
+    TABS.forEach((_,i)=>{const p=document.getElementById(`p${i}`);if(p)p.innerHTML=`<div class="err"><i class="ti ti-wifi-off" style="display:block;font-size:22px;margin-bottom:8px"></i>Error al cargar los datos</div>`;});
+  }
+
+  const now=new Date();
+  document.getElementById('upd').textContent=`Actualizado ${now.toLocaleTimeString('es-ES')}`;
+}
+
+loadAll();
 </script>
 </body>
 </html>
