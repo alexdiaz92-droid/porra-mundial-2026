@@ -168,7 +168,7 @@ function renderDetalle(data,vivoSel,vivoGol){
     h+=`<tr><td style="white-space:nowrap">${cat}</td><td class="r" style="color:var(--text2);font-size:12px">${mult}</td>`;
     parts.forEach(p=>{
       const apuesta=r[p.col]||'';
-      const pts=r[p.col+1]||'0';
+      const pts=r[p.col+2]||'0';
       if(!apuesta){h+=`<td class="r"></td>`;return;}
       const vivo=tipo==='sel'?vivoSel.has(apuesta):tipo==='gol'?vivoGol.has(apuesta):false;
       const ptsFmt=toFloat(pts).toFixed(1);
