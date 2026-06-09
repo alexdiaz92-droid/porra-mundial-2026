@@ -139,7 +139,7 @@ function renderGeneral(data){
   document.getElementById('sub').textContent=`${players.length} participantes · Mundial 2026`;
   let h='<div class="tbl-wrap"><table><thead><tr><th style="width:46px">#</th><th>Participante</th><th class="r">Puntos</th></tr></thead><tbody>';
   players.forEach((p,i)=>{
-    const badge=i<7?' 🍗🍺':' 💰';
+    const badge=i===0?' 🎁🍗🍺':i<7?' 🍗🍺':' 💰';
     h+=`<tr><td>${pc(i,(i+1)+'º')}</td><td><span class="name">${p.nombre}</span><span style="font-size:14px">${badge}</span></td><td class="r"><span class="${p.pts===0?'pts pts0':'pts'}">${p.pts.toFixed(2)}</span></td></tr>`;
   });
   return h+'</tbody></table></div>';
