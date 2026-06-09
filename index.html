@@ -69,6 +69,21 @@
     .selecc-table thead .col-sticky-r { background:var(--bg2); }
     .selecc-table tbody tr:hover .col-sticky-l,
     .selecc-table tbody tr:hover .col-sticky-r { background:var(--bg2); }
+
+    .detalle-wrap { overflow-x:auto; position:relative; }
+    .detalle-table { border-collapse:collapse; font-size:13px; width:100%; }
+    .detalle-table th, .detalle-table td { padding:8px 14px; border-bottom:1px solid var(--border); white-space:nowrap; vertical-align:middle; }
+    .detalle-table thead tr { background:var(--bg2); border-bottom:1px solid var(--border2); }
+    .detalle-table th { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+    .detalle-table td.r, .detalle-table th.r { text-align:right; }
+    .detalle-table tbody tr:hover { background:var(--bg2); }
+    .detalle-table tbody tr:last-child td { border-bottom:none; }
+    .det-sticky-1 { position:sticky; left:0; background:var(--bg); z-index:2; border-right:1px solid var(--border2); }
+    .det-sticky-2 { position:sticky; left:140px; background:var(--bg); z-index:2; border-right:1px solid var(--border2); }
+    .detalle-table thead .det-sticky-1,
+    .detalle-table thead .det-sticky-2 { background:var(--bg2); }
+    .detalle-table tbody tr:hover .det-sticky-1,
+    .detalle-table tbody tr:hover .det-sticky-2 { background:var(--bg2); }
   </style>
 </head>
 <body>
@@ -167,7 +182,7 @@ function renderDetalle(data, vivoSel, vivoGol){
   for(let c=2;c<header.length;c+=3){if(header[c]&&header[c].trim())parts.push({name:header[c].trim(),col:c});}
 
   const catRows=data.filter(r=>r[0]&&r[0].trim()&&r[0]!=='CATEGORÍA'&&r[1]&&r[1].trim());
-  let h='<div class="tbl-wrap"><table><thead><tr><th>Categoría</th><th class="r">Mult.</th>';
+  let h='<div class="detalle-wrap"><table class="detalle-table"><thead><tr><th class="det-sticky-1">Categoría</th><th class="r det-sticky-2">Mult.</th>';
   parts.forEach(p=>h+=`<th class="r" style="font-size:11px">${p.name}</th>`);
   h+='</tr></thead><tbody>';
   catRows.forEach(r=>{
