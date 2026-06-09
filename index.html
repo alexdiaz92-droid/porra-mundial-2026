@@ -79,7 +79,7 @@
     .detalle-table tbody tr:hover { background:var(--bg2); }
     .detalle-table tbody tr:last-child td { border-bottom:none; }
     .det-sticky-1 { position:sticky; left:0; background:var(--bg); z-index:2; border-right:1px solid var(--border2); }
-    .det-sticky-2 { position:sticky; left:140px; background:var(--bg); z-index:2; border-right:1px solid var(--border2); }
+    .det-sticky-2 { position:sticky; left:0; background:var(--bg); z-index:2; border-right:1px solid var(--border2); }
     .detalle-table thead .det-sticky-1,
     .detalle-table thead .det-sticky-2 { background:var(--bg2); }
     .detalle-table tbody tr:hover .det-sticky-1,
@@ -142,7 +142,7 @@ function buildTabs(){
     const b=document.createElement('button');
     b.className='tab'+(i===active?' active':'');
     b.innerHTML=`<i class="ti ${t.icon}" aria-hidden="true"></i>${t.label}`;
-    b.onclick=()=>{active=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((x,j)=>x.classList.toggle('active',j===i));};
+    b.onclick=()=>{active=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((x,j)=>x.classList.toggle('active',j===i));if(i===2)setTimeout(fixDetalleSticky,50);};
     tc.appendChild(b);
   });
 }
@@ -189,7 +189,7 @@ function renderDetalle(data, vivoSel, vivoGol){
     const cat=r[0];
     const mult=r[1];
     const tipo=cat.toLowerCase().includes('goleador')?'gol':cat.toLowerCase().includes('equipo')||cat.toLowerCase().includes('peor')?'sel':'pre';
-    h+=`<tr><td style="white-space:nowrap">${cat}</td><td class="r" style="color:var(--text2);font-size:12px">${mult}</td>`;
+    h+=`<tr><td class="det-sticky-1" style="font-size:13px;white-space:nowrap">${cat}</td><td class="r det-sticky-2" style="color:var(--text2);font-size:12px">${mult}</td>`;
     parts.forEach(p=>{
       const apuesta=r[p.col]||'';
       const pts=r[p.col+1]||'0';
@@ -256,6 +256,14 @@ function renderPremios(data){
     h+='</tr>';
   }
   return h+'</tbody></table></div>';
+}
+
+
+function fixDetalleSticky() {
+  const col1 = document.querySelector('.det-sticky-1');
+  if (!col1) return;
+  const w = col1.getBoundingClientRect().width;
+  document.querySelectorAll('.det-sticky-2').forEach(el => el.style.left = w + 'px');
 }
 
 async function loadAll(){
