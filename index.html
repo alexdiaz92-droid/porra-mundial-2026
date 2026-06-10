@@ -62,10 +62,23 @@
     .col-sticky-r { position:sticky; right:0; background:var(--bg); z-index:2; border-left:1px solid var(--border2); text-align:right; font-weight:700; }
     .selecc-table thead .col-sticky-l, .selecc-table thead .col-sticky-r { background:var(--bg2); }
     .selecc-table tbody tr:hover .col-sticky-l, .selecc-table tbody tr:hover .col-sticky-r { background:var(--bg2); }
+
+    .theme-btn { position:fixed; top:14px; right:14px; width:34px; height:34px; border-radius:50%; border:1px solid var(--border2); background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,0.12); transition:all 0.2s; }
+    .theme-btn:hover { transform:scale(1.1); }
+
+    body.dark { --bg:#141418; --bg2:#1e1e26; --bg3:#252530; --text:#eeeef5; --text2:#9999bb; --text3:#55556f; --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15); }
+    body.dark .gm{background:#78350f;color:#fef3c7}
+    body.dark .sm{background:#374151;color:#e2e8f0}
+    body.dark .bm{background:#7c2d12;color:#fde8d8}
+    body.light { --bg:#fff; --bg2:#f8f9fa; --bg3:#f0f2f5; --text:#1a1a2e; --text2:#555577; --text3:#999; --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16); }
+    body.light .gm{background:#fef3c7;color:#78350f}
+    body.light .sm{background:#e2e8f0;color:#374151}
+    body.light .bm{background:#fde8d8;color:#7c2d12}
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
+<button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
 <div class="app">
   <div class="hdr">
     <h1>⚽ Bolilla Opi Mundial 2026 🏆</h1>
@@ -272,6 +285,27 @@ async function loadAll(){
   const now=new Date();
   document.getElementById('upd').textContent=`Actualizado ${now.toLocaleTimeString('es-ES')}`;
 }
+
+
+function getSystemDark(){ return window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function toggleTheme(){
+  const body = document.body;
+  const btn = document.getElementById('themeBtn');
+  if(body.classList.contains('dark')){
+    body.classList.remove('dark'); body.classList.add('light');
+    btn.textContent = '🌙'; localStorage.setItem('theme','light');
+  } else {
+    body.classList.remove('light'); body.classList.add('dark');
+    btn.textContent = '☀️'; localStorage.setItem('theme','dark');
+  }
+}
+(function(){
+  const saved = localStorage.getItem('theme');
+  const prefersDark = getSystemDark();
+  const useDark = saved ? saved === 'dark' : prefersDark;
+  document.body.classList.add(useDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = useDark ? '☀️' : '🌙';
+})();
 
 loadAll();
 </script>
