@@ -63,7 +63,7 @@
     .selecc-table thead .col-sticky-l, .selecc-table thead .col-sticky-r { background:var(--bg2); }
     .selecc-table tbody tr:hover .col-sticky-l, .selecc-table tbody tr:hover .col-sticky-r { background:var(--bg2); }
 
-    .theme-btn { position:fixed; top:14px; right:14px; width:34px; height:34px; border-radius:50%; border:1px solid var(--border2); background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,0.12); transition:all 0.2s; }
+    .theme-btn { width:26px; height:26px; border-radius:50%; border:1px solid var(--border2); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:all 0.2s; margin-left:auto; margin-bottom:1px; flex-shrink:0; }
     .theme-btn:hover { transform:scale(1.1); }
 
     body.dark { --bg:#141418; --bg2:#1e1e26; --bg3:#252530; --text:#eeeef5; --text2:#9999bb; --text3:#55556f; --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15); }
@@ -78,7 +78,6 @@
   </style>
 </head>
 <body>
-<button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
 <div class="app">
   <div class="hdr">
     <h1>⚽ Bolilla Opi Mundial 2026 🏆</h1>
@@ -137,6 +136,12 @@ function buildTabs(){
     b.onclick=()=>{active=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((x,j)=>x.classList.toggle('active',j===i));};
     tc.appendChild(b);
   });
+  const btn=document.createElement('button');
+  btn.className='theme-btn';btn.id='themeBtn';btn.title='Cambiar tema';
+  btn.onclick=toggleTheme;
+  const prefersDark=document.body.classList.contains('dark');
+  btn.textContent=prefersDark?'☀️':'🌙';
+  tc.appendChild(btn);
 }
 
 function renderGeneral(data){
