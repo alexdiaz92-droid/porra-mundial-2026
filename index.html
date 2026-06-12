@@ -93,7 +93,7 @@
       <button class="btn" onclick="loadAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Actualizar</button>
     </div>
     <div id="panels"></div>
-    <div class="footer" id="footer"></div>
+    
   </div>
 </div>
 <script>
@@ -152,7 +152,6 @@ function renderGeneral(data){
     players.push({nombre:r[2].trim(),pts:toFloat(r[3])});
   });
   players.sort((a,b)=>b.pts-a.pts);
-  if(lu)document.getElementById('footer').textContent=`Última actualización: ${lu}`;
   document.getElementById('sub').textContent=`${players.length} participantes · Mundial 2026`;
   let h='<div class="tbl-wrap"><table><thead><tr><th style="width:46px">#</th><th>Participante</th><th class="r">Puntos</th></tr></thead><tbody>';
   players.forEach((p,i)=>{
