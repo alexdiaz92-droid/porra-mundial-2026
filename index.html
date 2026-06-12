@@ -86,9 +86,10 @@
     <p id="sub">Cargando datos...</p>
   </div>
   <div class="card">
-    <div class="tabs" id="tabs"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button></div>
+    <div class="tabs" id="tabs"></div>
     <div class="toolbar">
       <span class="live"><span class="dot"></span><span id="upd">En vivo</span></span>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
       <button class="btn" onclick="loadAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Actualizar</button>
     </div>
     <div id="panels"></div>
@@ -310,10 +311,11 @@ function renderHorarios(data){
       if(m.la1) tvBadges.push('<span class="badge-la1">La 1</span>');
       if(m.dazn) tvBadges.push('<span class="badge-dazn">DAZN</span>');
       const tv = tvBadges.join(' ');
-      const grp = m.grupo ? `<span class="grupo-badge">Grupo ${m.grupo}</span>` : '';
+      const grp = m.grupo ? `<span class="grupo-badge">${m.grupo}</span>` : '';
       h += `<tr>
         <td style="width:52px"><span class="hora">${m.horaStr}</span></td>
-        <td><span class="name">${m.partido}</span> ${grp}</td>
+        <td style="width:32px">${grp}</td>
+        <td><span class="name">${m.partido}</span></td>
         <td style="text-align:right;white-space:nowrap">${tv}</td>
       </tr>`;
     });
