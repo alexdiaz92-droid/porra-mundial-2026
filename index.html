@@ -70,6 +70,12 @@
 
     body.light { --bg:#fff; --bg2:#f8f9fa; --bg3:#f0f2f5; --text:#1a1a2e; --text2:#555577; --text3:#999; --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16); }
 
+
+    .date-group { padding:10px 14px 4px; font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.6px; border-bottom:1px solid var(--border); background:var(--bg2); }
+    .badge-dazn { font-size:11px; font-weight:600; color:var(--text); background:var(--bg2); border:1px solid var(--border2); padding:2px 7px; border-radius:4px; white-space:nowrap; }
+    .badge-la1 { font-size:11px; font-weight:600; color:#fff; background:#0055a5; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+    .grupo-badge { font-size:11px; color:var(--text2); background:var(--bg3); border:1px solid var(--border); padding:2px 6px; border-radius:4px; }
+    .hora { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
@@ -80,7 +86,7 @@
     <p id="sub">Cargando datos...</p>
   </div>
   <div class="card">
-    <div class="tabs" id="tabs"></div>
+    <div class="tabs" id="tabs"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Cambiar tema">🌙</button></div>
     <div class="toolbar">
       <span class="live"><span class="dot"></span><span id="upd">En vivo</span></span>
       <button class="btn" onclick="loadAll()"><i class="ti ti-refresh" aria-hidden="true"></i> Actualizar</button>
@@ -110,6 +116,7 @@ const URLS = {
   selecc:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=159607314&single=true&output=csv',
   goleadores:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=538522937&single=true&output=csv',
   premios:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=844381625&single=true&output=csv',
+  horarios:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8r4B2aUnREShzVkZseQYuO28SjFsf6qpQZy2WROipf3MFozOdfGSHgBJx03u-Dks_AXL4WR_GJ2At/pub?gid=1949257750&single=true&output=csv',
 };
 
 function fetch_(url){return new Promise((res,rej)=>Papa.parse(url,{download:true,skipEmptyLines:false,complete:r=>res(r.data),error:rej}));}
@@ -132,12 +139,6 @@ function buildTabs(){
     b.onclick=()=>{active=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('active',j===i));document.querySelectorAll('.panel').forEach((x,j)=>x.classList.toggle('active',j===i));};
     tc.appendChild(b);
   });
-  const btn=document.createElement('button');
-  btn.className='theme-btn';btn.id='themeBtn';btn.title='Cambiar tema';
-  btn.onclick=toggleTheme;
-  const prefersDark=document.body.classList.contains('dark');
-  btn.textContent=prefersDark?'☀️':'🌙';
-  tc.appendChild(btn);
 }
 
 function renderGeneral(data){
@@ -251,6 +252,75 @@ function renderPremios(data){
   return h+'</tbody></table></div>';
 }
 
+
+function renderHorarios(data){
+  const rows = data.slice(1).filter(r => r[0] && r[0].trim() && r[2] && r[2].trim());
+  const now = new Date();
+
+  // Parse and filter: hide matches that started more than 4h ago
+  const matches = [];
+  rows.forEach(r => {
+    const fechaStr = r[0].trim(); // DD/MM/YY
+    const horaStr  = r[1].trim(); // HH:MM
+    const partido  = r[2].trim();
+    const grupo    = r[3] ? r[3].trim() : '';
+    const dazn     = r[4] ? r[4].trim() : '';
+    const la1      = r[5] ? r[5].trim() : '';
+
+    // Parse date DD/MM/YY or DD/MM/YYYY
+    const parts = fechaStr.split('/');
+    if(parts.length < 3) return;
+    const day = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const year = parseInt(parts[2]) < 100 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+    const timeParts = horaStr.split(':');
+    const hour = parseInt(timeParts[0]);
+    const min  = parseInt(timeParts[1]) || 0;
+    const kickoff = new Date(year, month, day, hour, min, 0);
+    const hideAfter = new Date(kickoff.getTime() + 4 * 60 * 60 * 1000);
+    if(now > hideAfter) return;
+
+    matches.push({ kickoff, fechaStr, horaStr, partido, grupo, dazn, la1 });
+  });
+
+  if(!matches.length) return '<div class="err" style="padding:3rem 1rem">🎉 ¡No quedan partidos pendientes!</div>';
+
+  // Group by date string
+  const groups = {};
+  const groupOrder = [];
+  matches.forEach(m => {
+    const key = m.fechaStr;
+    if(!groups[key]){ groups[key] = []; groupOrder.push(key); }
+    groups[key].push(m);
+  });
+
+  const dayNames = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  let h = '';
+  groupOrder.forEach(key => {
+    const ms = groups[key];
+    const d = ms[0].kickoff;
+    const label = `${dayNames[d.getDay()]} ${d.getDate()} de ${monthNames[d.getMonth()]}`;
+    h += `<div class="date-group">${label}</div>`;
+    h += '<div class="tbl-wrap"><table><tbody>';
+    ms.forEach(m => {
+      const tvBadges = [];
+      if(m.la1) tvBadges.push('<span class="badge-la1">La 1</span>');
+      if(m.dazn) tvBadges.push('<span class="badge-dazn">DAZN</span>');
+      const tv = tvBadges.join(' ');
+      const grp = m.grupo ? `<span class="grupo-badge">Grupo ${m.grupo}</span>` : '';
+      h += `<tr>
+        <td style="width:52px"><span class="hora">${m.horaStr}</span></td>
+        <td><span class="name">${m.partido}</span> ${grp}</td>
+        <td style="text-align:right;white-space:nowrap">${tv}</td>
+      </tr>`;
+    });
+    h += '</tbody></table></div>';
+  });
+  return h;
+}
+
 async function loadAll(){
   document.getElementById('upd').textContent='Actualizando...';
   buildTabs();
@@ -263,9 +333,9 @@ async function loadAll(){
     pc2.appendChild(d);
   });
   try{
-    const [dataClasif,dataResumen,dataDetalle,dataSelecc,dataGol,dataPremios]=await Promise.all([
+    const [dataClasif,dataResumen,dataDetalle,dataSelecc,dataGol,dataPremios,dataHorarios]=await Promise.all([
       fetch_(URLS.clasif),fetch_(URLS.resumen),fetch_(URLS.detalle),
-      fetch_(URLS.selecc),fetch_(URLS.goleadores),fetch_(URLS.premios)
+      fetch_(URLS.selecc),fetch_(URLS.goleadores),fetch_(URLS.premios),fetch_(URLS.horarios)
     ]);
     const vivoSel=new Set();
     dataSelecc.slice(1).forEach(r=>{if(r[0]&&r[r.length-1]==='Sí')vivoSel.add(r[0].trim());});
@@ -278,6 +348,7 @@ async function loadAll(){
       renderSelecc(dataSelecc),
       renderGoleadores(dataGol),
       renderPremios(dataPremios),
+      renderHorarios(dataHorarios),
     ];
     renders.forEach((html,i)=>{const p=document.getElementById(`p${i}`);if(p)p.innerHTML=html;});
   }catch(e){
